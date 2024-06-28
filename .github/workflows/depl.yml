@@ -1,45 +1,3 @@
-# name: Build and Publish Docker image
-# on:
-#   push:
-#     branches: [main]
-
-# jobs:
-#   build-and-push:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - uses: actions/checkout@v4
-
-#       - name: Login to Dockerhub_
-#         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-#         with:
-#           username: ${{ secrets.DOCKER_HUB_USERNAME }}
-#           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-#       # - name: Create .env file
-#       #   run: echo "${{ secrets.ENV }}" | base64 -d > .env
-
-#       - name: Build and tag Docker image
-#         run: |
-#           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest .
-
-#       - name: Push Docker image
-#         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
-
-#       # - name: Update image metadata
-#       #   uses: docker/metadata-action@v5
-#       #   with:
-#       #     images: ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
-#       #     tags: |
-#       #       type=sha
-#       #     labels: |
-#       #       org.opencontainers.image.title=NestJS Example
-#       #       org.opencontainers.image.description=Example NestJS application
-#       #       org.opencontainers.image.url=https://github.com/${{github.repository}}
-#       #       org.opencontainers.image.revision=${{github.sha}}
-#       #       org.opencontainers.image.licenses=MIT
-
-
 name: Deploy
 
 on:
@@ -56,17 +14,13 @@ jobs:
       USER_NAME: ${{ secrets.EC2_USERNAME }}
 
     steps:
-      - uses: actions/checkout@v2 
+      - uses: actions/checkout@v2
 
       - name: Setup SSH and Deploy
         run: |
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key
           chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} << 'EOF'
-            cd /path/to/project
-            git pull origin main
-            docker build -t your-image-name .
-            docker stop your-container-name || true
-            docker rm your-container-name || true
-            docker run -d --name your-container-name -p 80:80 your-image-name
+            # Display a message indicating SSH is working
+            echo "SSH connection established successfully."
           EOF
