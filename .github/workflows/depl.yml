@@ -62,6 +62,6 @@ jobs:
     - name: Create a new file on the EC2 instance with "hello-world"
       run: ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_URL "echo "hello-world" >> new_file.txt"
 
-      #yml
+      #ymli
     
     
