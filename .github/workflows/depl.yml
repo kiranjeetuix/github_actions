@@ -50,20 +50,23 @@ jobs:
   Deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
+    env:
+      PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      HOSTNAME: ${{ secrets.EC2_URL }}
+      USER_NAME: ${{ secrets.EC2_USERNAME }}
+
     steps:
       - uses: actions/checkout@v2 
-      - name: Build & Deploy
-        env:
-            PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-            HOSTNAME: ${{secrets.EC2_URL}}
-            USER_NAME: ${{secrets.EC2_USERNAME}}
 
+      - name: Setup SSH and Deploy
         run: |
-          echo ${PRIVATE_KEY} > private_key 
-          cat private_key
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key
           chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 
-
-      #secret updated 1 croreth time
-    
-    
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} << 'EOF'
+            cd /path/to/project
+            git pull origin main
+            docker build -t your-image-name .
+            docker stop your-container-name || true
+            docker rm your-container-name || true
+            docker run -d --name your-container-name -p 80:80 your-image-name
+          EOF
