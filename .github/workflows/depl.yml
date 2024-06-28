@@ -1,0 +1,38 @@
+name: Build and publish Docker image
+on:
+     push:
+        branches: [ master ]
+jobs:
+    build-and-push:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Login to Dockerhub
+              uses: docker/login-action@v1
+              with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - name: Create .env file
+              run: echo "${{secrets.ENV}}" | based -d > .env
+
+            - name: Build and tag Docker image
+              run:
+                docker build -t ${{secrets.DOCKERHUB_USERNAME}}/github-actions:latest .
+
+            - name: Push Docker image
+              run:
+                docker push ${{secrets.DOCKERHUB_USERNAME}}/github-actions:latest
+              
+            - name: Update image metadata
+              uses: docker/metadata-action@v3
+              with:
+                images: ${{secrets.DOCKERHUB_USERNAME}}/github-actions:latest
+                tage:
+                    ${{github.sha}}
+
+            
+
+
+
+
