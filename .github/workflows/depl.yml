@@ -1,40 +1,66 @@
-name: Build and Publish Docker image
+# name: Build and Publish Docker image
+# on:
+#   push:
+#     branches: [main]
+
+# jobs:
+#   build-and-push:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Login to Dockerhub_
+#         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+#         with:
+#           username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#           password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+#       # - name: Create .env file
+#       #   run: echo "${{ secrets.ENV }}" | base64 -d > .env
+
+#       - name: Build and tag Docker image
+#         run: |
+#           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest .
+
+#       - name: Push Docker image
+#         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
+
+#       # - name: Update image metadata
+#       #   uses: docker/metadata-action@v5
+#       #   with:
+#       #     images: ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
+#       #     tags: |
+#       #       type=sha
+#       #     labels: |
+#       #       org.opencontainers.image.title=NestJS Example
+#       #       org.opencontainers.image.description=Example NestJS application
+#       #       org.opencontainers.image.url=https://github.com/${{github.repository}}
+#       #       org.opencontainers.image.revision=${{github.sha}}
+#       #       org.opencontainers.image.licenses=MIT
+
+
+name: Setup SSH for EC2 instance
+
 on:
   push:
-    branches: [main]
+    branches:
+      - master
 
 jobs:
-  build-and-push:
+  setup-ssh:
     runs-on: ubuntu-latest
-
+    env:
+      EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      EC2_URL: ${{ secrets.EC2_URL }}
+      EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Login to Dockerhub_
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      # - name: Create .env file
-      #   run: echo "${{ secrets.ENV }}" | base64 -d > .env
-
-      - name: Build and tag Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest .
-
-      - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
-
-      # - name: Update image metadata
-      #   uses: docker/metadata-action@v5
-      #   with:
-      #     images: ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
-      #     tags: |
-      #       type=sha
-      #     labels: |
-      #       org.opencontainers.image.title=NestJS Example
-      #       org.opencontainers.image.description=Example NestJS application
-      #       org.opencontainers.image.url=https://github.com/${{github.repository}}
-      #       org.opencontainers.image.revision=${{github.sha}}
-      #       org.opencontainers.image.licenses=MIT
+    - name: Setup SSH for EC2
+      uses: omarhosny206/setup-ssh-for-ec2@v1.0.0
+      with:
+          EC2_SSH_PRIVATE_KEY: $EC2_SSH_PRIVATE_KEY
+          EC2_URL: $EC2_URL
+    - name: Create a new file on the EC2 instance with "hello-world"
+      run: ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_URL "echo "hello-world" >> new_file.txt"
+    
+    
