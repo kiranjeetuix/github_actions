@@ -1,3 +1,46 @@
+# name: Build and Publish Docker image
+# on:
+#   push:
+#     branches: [main]
+
+# jobs:
+#   build-and-push:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Login to Dockerhub_
+#         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+#         with:
+#           username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#           password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+#       # - name: Create .env file
+#       #   run: echo "${{ secrets.ENV }}" | base64 -d > .env
+
+#       - name: Build and tag Docker image
+#         run: |
+#           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest .
+
+#       - name: Push Docker image
+#         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
+
+#       # - name: Update image metadata
+#       #   uses: docker/metadata-action@v5
+#       #   with:
+#       #     images: ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-example:latest
+#       #     tags: |
+#       #       type=sha
+#       #     labels: |
+#       #       org.opencontainers.image.title=NestJS Example
+#       #       org.opencontainers.image.description=Example NestJS application
+#       #       org.opencontainers.image.url=https://github.com/${{github.repository}}
+#       #       org.opencontainers.image.revision=${{github.sha}}
+#       #       org.opencontainers.image.licenses=MIT
+
+
+
 name: Deploy
 
 on:
@@ -24,3 +67,73 @@ jobs:
             # Display a message indicating SSH is working
             echo "SSH connection established successfully."
           EOF
+
+    
+    ####last try
+#     name: Deploy to EC2
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     name: Deploy to EC2
+#     runs-on: ubuntu-latest
+#     env:
+#       PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+#       HOSTNAME: ${{ secrets.EC2_URL }}
+#       USER_NAME: ${{ secrets.EC2_USERNAME }}
+#       REPO_URL: ${{ secrets.REPO_URL }}  # Add your repository URL as a secret
+#       PROJECT_DIRECTORY: /path/to/project  # Change this to the desired directory path
+#       DOCKER_IMAGE_NAME: your-docker-image-name
+
+#     steps:
+#       - uses: actions/checkout@v2
+
+#       - name: Setup SSH and Deploy
+#         run: |
+#           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key
+#           chmod 600 private_key
+#           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} << 'EOF'
+#             set -e
+
+#             # Update package index and install Docker if not already installed
+#             if ! command -v docker &> /dev/null
+#             then
+#               sudo apt update
+#               sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+#               curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+#               sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+#               sudo apt update
+#               sudo apt install -y docker-ce
+#               sudo usermod -aG docker $USER
+#             fi
+
+#             # Clone the repository if it doesn't exist, otherwise pull the latest changes
+#             if [ ! -d "$PROJECT_DIRECTORY/.git" ]; then
+#               git clone $REPO_URL $PROJECT_DIRECTORY
+#             else
+#               cd $PROJECT_DIRECTORY
+#               git pull origin main
+#             fi
+
+#             # Change to the project directory
+#             cd $PROJECT_DIRECTORY
+
+#             # Build the new Docker image
+#             docker build -t $DOCKER_IMAGE_NAME:latest .
+
+#             # Stop the old container (if running)
+#             if [ "$(docker ps -q -f name=$DOCKER_IMAGE_NAME)" ]; then
+#               docker stop $DOCKER_IMAGE_NAME
+#               docker rm $DOCKER_IMAGE_NAME
+#             fi
+
+#             # Run the new container
+#             docker run -d --name $DOCKER_IMAGE_NAME -p 3000:3000 $DOCKER_IMAGE_NAME:latest
+
+#             # Exit the SSH session
+#             exit
+#           EOF
