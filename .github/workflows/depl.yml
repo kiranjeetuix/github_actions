@@ -111,16 +111,34 @@ jobs:
               sudo usermod -aG docker $USER
             fi
 
-            # Clone the repository if it doesn't exist, otherwise pull the latest changes
-            if [ ! -d "${{ secrets.REPO_URL}}/.git" ]; then
-               git clone ${{ secrets.REPO_URL}} ${{ secrets.PROJECT_DIRECTORY}}
-            else
-              cd ${{ secrets.PROJECT_DIRECTORY}}
-              git pull origin main
-            fi
+            # # Clone the repository if it doesn't exist, otherwise pull the latest changes
+            # if [ ! -d "${{ secrets.REPO_URL}}/.git" ]; then
+            #    git clone ${{ secrets.REPO_URL}} ${{ secrets.PROJECT_DIRECTORY}}
+            # else
+            #   cd ${{ secrets.PROJECT_DIRECTORY}}
+            #   git pull origin main
+            # fi
 
-            # Change to the project directory
-            cd ${{ secrets.PROJECT_DIRECTORY}}
+            # # Change to the project directory
+            # cd ${{ secrets.PROJECT_DIRECTORY}}
+
+          f [ -d "${{ secrets.PROJECT_DIRECTORY}}/.git" ]; then
+                echo "Git repository already exists in ${{ secrets.PROJECT_DIRECTORY}}. Pulling latest changes..."
+                cd ${{ secrets.PROJECT_DIRECTORY}}
+                git pull
+              else
+                if [ -d "${{ secrets.PROJECT_DIRECTORY}}" ]; then
+                  echo "Directory ${{ secrets.PROJECT_DIRECTORY}} exists but is not a Git repository. Removing existing contents..."
+                  rm -rf ${{ secrets.PROJECT_DIRECTORY}}/*
+                else
+                  echo "Directory ${{ secrets.PROJECT_DIRECTORY}} does not exist. Creating directory..."
+                  mkdir -p ${{ secrets.PROJECT_DIRECTORY}}
+                fi
+                
+                echo "Cloning repository into ${{ secrets.PROJECT_DIRECTORY}}}..."
+                git clone https://github.com/kiranjeetuix/github_actions.git ${{ secrets.PROJECT_DIRECTORY}}
+                cd ${{ secrets.PROJECT_DIRECTORY}}
+              fi
 
             # Build the new Docker image
             docker build -t ${{secrets.DOCKER_IMAGE_NAME}}:latest .
