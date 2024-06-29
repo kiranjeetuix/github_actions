@@ -133,6 +133,7 @@ jobs:
 
             # Run the new container
             docker run -d --name ${{secrets.DOCKER_IMAGE_NAME}} -p 3000:3000 ${{secrets.DOCKER_IMAGE_NAME}}:latest
+            echo "Building the Docker image"
 
             # Exit the SSH session
             exit
