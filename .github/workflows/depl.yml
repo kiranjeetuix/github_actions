@@ -41,53 +41,20 @@
 
 
 
-name: Deploy
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  Deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
-    env:
-      PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-      HOSTNAME: ${{ secrets.EC2_URL }}
-      USER_NAME: ${{ secrets.EC2_USERNAME }}
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup SSH and Deploy
-        run: |
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key
-          chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} << 'EOF'
-            # Display a message indicating SSH is working
-            echo "SSH connection established successfully."
-          EOF
-
-    
-    ####last try
-#     name: Deploy to EC2
+# name: Deploy
 
 # on:
 #   push:
-#     branches:
-#       - main
+#     branches: [ main ]
 
 # jobs:
-#   deploy:
+#   Deploy:
 #     name: Deploy to EC2
 #     runs-on: ubuntu-latest
 #     env:
 #       PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 #       HOSTNAME: ${{ secrets.EC2_URL }}
 #       USER_NAME: ${{ secrets.EC2_USERNAME }}
-#       REPO_URL: ${{ secrets.REPO_URL }}  # Add your repository URL as a secret
-#       PROJECT_DIRECTORY: /path/to/project  # Change this to the desired directory path
-#       DOCKER_IMAGE_NAME: your-docker-image-name
 
 #     steps:
 #       - uses: actions/checkout@v2
@@ -97,43 +64,76 @@ jobs:
 #           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key
 #           chmod 600 private_key
 #           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} << 'EOF'
-#             set -e
-
-#             # Update package index and install Docker if not already installed
-#             if ! command -v docker &> /dev/null
-#             then
-#               sudo apt update
-#               sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
-#               curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-#               sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-#               sudo apt update
-#               sudo apt install -y docker-ce
-#               sudo usermod -aG docker $USER
-#             fi
-
-#             # Clone the repository if it doesn't exist, otherwise pull the latest changes
-#             if [ ! -d "$PROJECT_DIRECTORY/.git" ]; then
-#               git clone $REPO_URL $PROJECT_DIRECTORY
-#             else
-#               cd $PROJECT_DIRECTORY
-#               git pull origin main
-#             fi
-
-#             # Change to the project directory
-#             cd $PROJECT_DIRECTORY
-
-#             # Build the new Docker image
-#             docker build -t $DOCKER_IMAGE_NAME:latest .
-
-#             # Stop the old container (if running)
-#             if [ "$(docker ps -q -f name=$DOCKER_IMAGE_NAME)" ]; then
-#               docker stop $DOCKER_IMAGE_NAME
-#               docker rm $DOCKER_IMAGE_NAME
-#             fi
-
-#             # Run the new container
-#             docker run -d --name $DOCKER_IMAGE_NAME -p 3000:3000 $DOCKER_IMAGE_NAME:latest
-
-#             # Exit the SSH session
-#             exit
+#             # Display a message indicating SSH is working
+#             echo "SSH connection established successfully."
 #           EOF
+
+    
+    ####last try
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    env:
+      PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      HOSTNAME: ${{ secrets.EC2_URL }}
+      USER_NAME: ${{ secrets.EC2_USERNAME }}
+      REPO_URL: ${{ secrets.REPO_URL }}  # Add your repository URL as a secret
+      PROJECT_DIRECTORY: /path/to/project  # Change this to the desired directory path
+      DOCKER_IMAGE_NAME: your-docker-image-name
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup SSH and Deploy
+        run: |
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > private_key
+          chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} << 'EOF'
+            set -e
+
+            # Update package index and install Docker if not already installed
+            if ! command -v docker &> /dev/null
+            then
+              sudo apt update
+              sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+              sudo apt update
+              sudo apt install -y docker-ce
+              sudo usermod -aG docker $USER
+            fi
+
+            # Clone the repository if it doesn't exist, otherwise pull the latest changes
+            if [ ! -d "$PROJECT_DIRECTORY/.git" ]; then
+              git clone $REPO_URL $PROJECT_DIRECTORY
+            else
+              cd $PROJECT_DIRECTORY
+              git pull origin main
+            fi
+
+            # Change to the project directory
+            cd $PROJECT_DIRECTORY
+
+            # Build the new Docker image
+            docker build -t $DOCKER_IMAGE_NAME:latest .
+
+            # Stop the old container (if running)
+            if [ "$(docker ps -q -f name=$DOCKER_IMAGE_NAME)" ]; then
+              docker stop $DOCKER_IMAGE_NAME
+              docker rm $DOCKER_IMAGE_NAME
+            fi
+
+            # Run the new container
+            docker run -d --name $DOCKER_IMAGE_NAME -p 3000:3000 $DOCKER_IMAGE_NAME:latest
+
+            # Exit the SSH session
+            exit
+          EOF
