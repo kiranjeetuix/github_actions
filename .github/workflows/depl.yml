@@ -137,3 +137,5 @@ jobs:
             # Exit the SSH session
             exit
           EOF
+
+      #changed repo url to http only
