@@ -207,4 +207,4 @@ jobs:
             echo "Building the Docker image"
 
             # Exit the SSH session
-            exit()
+          EOF
