@@ -208,4 +208,3 @@ jobs:
 
             # Exit the SSH session
             exit
-          EOF
