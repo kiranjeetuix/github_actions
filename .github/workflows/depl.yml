@@ -121,20 +121,19 @@ jobs:
               echo "Cloning repository into ${{ secrets.PROJECT_DIRECTORY }}..."
               git clone ${{ secrets.REPO_URL }} ${{ secrets.PROJECT_DIRECTORY }}
               cd ${{ secrets.PROJECT_DIRECTORY }}
-            fi
 
-            # Build the Docker image
-            docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ secrets.DOCKER_IMAGE_TAG }} .
+          # Build the new Docker image
+            docker build -t ${{secrets.DOCKER_IMAGE_NAME}}:latest .
 
-            # Stop and remove the old container (if running)
-            if [ "$(docker ps -q -f name=${{ secrets.DOCKER_IMAGE_NAME }})" ]; then
-              docker stop ${{ secrets.DOCKER_IMAGE_NAME }}
-              docker rm ${{ secrets.DOCKER_IMAGE_NAME }}
+            # Stop the old container (if running)
+            if [ "$(docker ps -q -f name=${{secrets.DOCKER_IMAGE_NAME}})" ]; then
+              docker stop ${{secrets.DOCKER_IMAGE_NAME}}
+              docker rm ${{secrets.DOCKER_IMAGE_NAME}}
             fi
 
             # Run the new container
-            docker run -d --name ${{ secrets.DOCKER_IMAGE_NAME }} -p 3000:3000 ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ secrets.DOCKER_IMAGE_TAG }}
-            echo "Deployed Docker container"
+            docker run -d --name ${{secrets.DOCKER_IMAGE_NAME}} -p 3000:3000 ${{secrets.DOCKER_IMAGE_NAME}}:latest
+            echo "Building the Docker image"
 
             # Exit the SSH session
             exit
