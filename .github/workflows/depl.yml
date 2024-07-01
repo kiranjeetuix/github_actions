@@ -171,4 +171,8 @@ jobs:
         service: ${{ secrets.ECS_SERVICE }}
         cluster: ${{ secrets.ECS_CLUSTER }}
         wait-for-service-stability: true
-        #container1-name
+       
+        #cluster - (m)service1 -(load balancer) (m)-task-defination - (container1,container2,container3)
+        #                                    -task-defination  -c1,c2,c3 
+        #                                    -task-defination - 1repository(ecr)-n(images)->latest
+        #        - service2
